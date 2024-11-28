@@ -4,11 +4,15 @@ on: [push, pull_request]
 jobs:
   build-win32:
     runs-on: ubuntu-latest
-    container: ghcr.io/irixxxx/toolchain-win32
+    container: mcr.microsoft.com/windows/servercore:ltsc2019
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
+      - name: Install Dependencies
+        run: |
+          choco install -y mingw
+          choco install -y cmake
       - name: Configure
         run: |
           git config --global --add safe.directory $PWD
