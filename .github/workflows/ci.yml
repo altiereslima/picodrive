@@ -23,6 +23,8 @@ jobs:
       - name: Build
         run: |
           $jobs = (Get-WmiObject -Class Win32_ComputerSystem).NumberOfLogicalProcessors
+          if (-not $jobs) { $jobs = 2 }  # Fallback to 2 jobs if no value is detected
+          Write-Host "Number of logical processors: $jobs"
           make -j$jobs
 
       - name: Package DLL
