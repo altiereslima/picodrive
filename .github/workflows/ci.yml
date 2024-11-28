@@ -1,32 +1,16 @@
 name: Picodrive CI
 on: [push, pull_request]
-
 jobs:
-  build-win-dll:
+  build-libretro:
     runs-on: ubuntu-latest
-    container: ghcr.io/irixxxx/toolchain-win32
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: true
-    - name: Set Platform to Win
-      run: echo "platform=win" >> $GITHUB_ENV
-    - name: Configure Git
-      run: |
-        git config --global --add safe.directory $PWD
-    - name: Install Dependencies
-      run: |
-        sudo apt-get update -qq
-        sudo apt-get install -y mingw-w64
-    - name: Configure
-      run: |
-        ver=$(cut -d'"' -f2 platform/common/version.h)-$(git rev-parse --short HEAD)
-        ./configure --platform=win
-    - name: Build
-      run: |
-        make -j$(getconf _NPROCESSORS_ONLN) -f Makefile.libretro TARGET=PicoDrive_libretro.dll
-    - name: Artifacts
+    - name: make
+      run: LDFLAGS=-Wl,--no-undefined make -j$(getconf _NPROCESSORS_ONLN) -f Makefile.libretro
+    - name: artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: WinDLL
-        path: PicoDrive_libretro.dll
+        name: Win32
+        path: PicoDrive-libretro*.dll
