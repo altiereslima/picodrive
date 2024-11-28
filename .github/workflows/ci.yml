@@ -22,6 +22,7 @@ jobs:
 
       - name: Build
         run: |
+          $jobs = (Get-WmiObject -Class Win32_ComputerSystem).NumberOfLogicalProcessors
           make -j$jobs
 
       - name: Package DLL
