@@ -10,9 +10,7 @@ jobs:
       with:
         submodules: true
     - name: Set Platform to Win
-      run: echo "Setting platform to win"
-      env:
-        platform: win
+      run: echo "platform=win" >> $GITHUB_ENV
     - name: build
       run: |
         git config --global --add safe.directory $PWD
