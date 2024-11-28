@@ -4,25 +4,33 @@ on: [push, pull_request]
 jobs:
   build-win32:
     runs-on: ubuntu-latest
-    container: mcr.microsoft.com/windows/servercore:ltsc2019
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
         with:
           submodules: true
-      - name: Install Dependencies
-        run: |
-          choco install -y mingw
-          choco install -y cmake
+
+      - name: Set up WSL
+        uses: microsoft/wsl-act-runner@v1
+        with:
+          distribution: Ubuntu
+          run: |
+            sudo apt update
+            sudo apt install -y git build-essential mingw-w64 cmake
+
       - name: Configure
         run: |
           git config --global --add safe.directory $PWD
           ./configure --platform=windows-dll
+
       - name: Build
         run: |
-          make -j$(getconf _NPROCESSORS_ONLN)
+          make -j$(nproc)
+
       - name: Package DLL
         run: |
           mv picodrive.dll PicoDrive-win32-$(cut -d'"' -f2 platform/common/version.h)-$(git rev-parse --short HEAD).dll
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
