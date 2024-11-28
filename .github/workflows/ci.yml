@@ -1,9 +1,12 @@
 name: Picodrive CI
-on: [push, pull_request]
+
+on: 
+  [push, pull_request]
 
 jobs:
   build-win32:
     runs-on: windows-latest
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -12,27 +15,35 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          # Instalar MinGW
           choco install -y mingw
+          # Instalar CMake
           choco install -y cmake
+          # Instalar Build Tools (Visual Studio) se necessário
+          choco install -y visualstudio2019buildtools
 
       - name: Configure
         run: |
           git config --global --add safe.directory $PWD
+          # Configurar o projeto para Windows DLL
           ./configure --platform=windows-dll
 
       - name: Build
         run: |
-          # Get number of logical processors, fallback to 2 if not detected
+          # Obter o número de processadores lógicos
           $jobs = (Get-WmiObject -Class Win32_ComputerSystem).NumberOfLogicalProcessors
-          if (-not $jobs) { $jobs = 2 }  # Fallback to 2 jobs if no value is detected
+          if (-not $jobs) { $jobs = 2 }  # Fallback para 2 jobs se não detectado
           Write-Host "Number of logical processors: $jobs"
           
-          # Run make with the appropriate number of jobs
+          # Executar o Make com o número de jobs adequado
           make -j$jobs -f Makefile.libretro
 
       - name: Package DLL
         run: |
-          mv picodrive.dll PicoDrive-win32-$(cut -d'"' -f2 platform/common/version.h)-$(git rev-parse --short HEAD).dll
+          # Renomear a DLL para incluir a versão e o hash do commit
+          $version = (Get-Content platform/common/version.h | Select-String -Pattern "VERSION_STRING" | ForEach-Object { $_.Line.Split('=')[1].Trim() })
+          $commitHash = git rev-parse --short HEAD
+          mv picodrive.dll "PicoDrive-win32-$version-$commitHash.dll"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
