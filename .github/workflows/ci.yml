@@ -22,10 +22,13 @@ jobs:
 
       - name: Build
         run: |
+          # Get number of logical processors, fallback to 2 if not detected
           $jobs = (Get-WmiObject -Class Win32_ComputerSystem).NumberOfLogicalProcessors
           if (-not $jobs) { $jobs = 2 }  # Fallback to 2 jobs if no value is detected
           Write-Host "Number of logical processors: $jobs"
-          make -j$jobs
+          
+          # Run make with the appropriate number of jobs
+          make -j$jobs -f Makefile.libretro
 
       - name: Package DLL
         run: |
