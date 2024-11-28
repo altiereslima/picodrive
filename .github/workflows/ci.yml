@@ -22,7 +22,7 @@ jobs:
 
       - name: Build
         run: |
-          make -j$(nproc)
+          make -j$jobs
 
       - name: Package DLL
         run: |
