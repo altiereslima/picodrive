@@ -13,4 +13,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: Win32
-        path: /*.dll
+        path: picodrive
