@@ -1,1 +1,35 @@
-runs-on: ubuntu-latest
+name: Picodrive CI
+on: [push, pull_request]
+
+jobs:
+  build-win32:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Install Dependencies
+        run: |
+          choco install -y mingw
+          choco install -y cmake
+
+      - name: Configure
+        run: |
+          git config --global --add safe.directory $PWD
+          ./configure --platform=windows-dll
+
+      - name: Build
+        run: |
+          make -j$(nproc)
+
+      - name: Package DLL
+        run: |
+          mv picodrive.dll PicoDrive-win32-$(cut -d'"' -f2 platform/common/version.h)-$(git rev-parse --short HEAD).dll
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Win32-DLL
+          path: PicoDrive-win32-*.dll
