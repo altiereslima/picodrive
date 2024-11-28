@@ -11,13 +11,15 @@ jobs:
         submodules: true
     - name: Set Platform to Win
       run: echo "platform=win" >> $GITHUB_ENV
+    - name: Configure Git
+      run: |
+        git config --global --add safe.directory $PWD
     - name: Install Dependencies
       run: |
         sudo apt-get update -qq
         sudo apt-get install -y mingw-w64
     - name: Configure
       run: |
-        git config --global --add safe.directory $PWD
         ver=$(cut -d'"' -f2 platform/common/version.h)-$(git rev-parse --short HEAD)
         ./configure --platform=win
     - name: Build
